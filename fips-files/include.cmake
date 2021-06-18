@@ -25,3 +25,7 @@ endmacro()
 macro(fipsutil_embed yml_file hdr_name)
     fips_generate(FROM ${yml_file} TYPE embed HEADER ${hdr_name})
 endmacro()
+
+macro(fipsutil_compress yml_file hdr_name)
+    fips_generate(FROM ${yml_file} TYPE compress HEADER ${hdr_name})
+endmacro()

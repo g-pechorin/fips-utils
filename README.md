@@ -28,6 +28,7 @@ Those are usually available through cmake macros:
 
 - [fipsutil_copy()](fips-files/generators/copy.py): copy files from project directory to deployment directory
 - [fipsutil_embed()](fips-files/generators/embed.py): embed binary files into C headers
+- [fipsutil_compress()](fips-files/generators/compress.py): compress your files into gzipped blobs you can then embed
 
 For usage examples, see the [sokol-samples](https://github.com/floooh/sokol-samples/)
 and [chips-test](https://github.com/floooh/chips-test/) repositories.
