@@ -120,7 +120,7 @@ def generate(input, out_src, out_hdr) :
 							if dop:
 								f.write('\n\t')
 							if sys.version_info[0] >= 3:
-								f.write(hex(ord(chr(byte))) + ', ')
+								f.write( hex(ord(chr(byte))).rjust(4, ' ') + ', ' )
 							else:
 								f.write(hex(ord(byte)) + ', ')
 							num += 1
