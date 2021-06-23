@@ -1,10 +1,77 @@
 '''
 compress.py
 
-compress and embed trees of files into your workspace
+compress and embed trees of files into your source code
+
+
+
+// looks like this;
+
+
+const void* src(const char* name, size_t& len)noexcept
+{
+	// it'd be swell if we could decompress without caching for stuff that'll only be used once
+	// ... which is everything in this project
+
+
+#define compressed_begin()	\
+	static struct { \
+		const char* _name; \
+		const size_t _zip_size; \
+		const void* _zip_data; \
+		void* _raw_data; \
+		const size_t _raw_size; \
+	} compressed_archive[] = {
+
+#define compressed(SRC_NAME, INDEX, ZIP_SIZE, ZIP_DATA, RAW_ITEM, RAW_SIZE)	{SRC_NAME, ZIP_SIZE, ZIP_DATA, nullptr, RAW_SIZE},
+#define compressed_close() {nullptr} };
+
+#include "../src.inc"
+
+	// ... so, for now; if "filename == null" we free whatever has been allocated
+	if (!name)
+	{
+		len = 0;
+		for (auto item = compressed_archive; item->_name; item++)
+			if (item->_raw_data)
+			{
+				free(item->_raw_data);
+				item->_raw_data = nullptr;
+				len += item->_raw_size;
+			}
+		return nullptr;
+	}
+
+	// search for a record to read
+	for (auto item = compressed_archive; item->_name; item++)
+	{
+		// is this not the record we're looking for?
+		if (!se(name, item->_name))
+			continue;
+
+		if (!item->_raw_data)
+			tinfl(
+				item->_raw_data = malloc(item->_raw_size),
+				item->_raw_size,
+				item->_zip_data, item->_zip_size
+			);
+
+		// do the output
+		len = item->_raw_size;
+		return item->_raw_data;
+	}
+
+	return nullptr;
+}
+
+
+
+
+
+
 '''
 
-Version = 2
+Version = 3
 
 import sys
 import os.path
@@ -26,7 +93,7 @@ def generate(input, out_src, out_hdr) :
 			strip = strip and conf['strip']
 		
 		# (cosmetic) how many bytes per line
-		line = 32
+		line = 18
 		if 'line' in conf:
 			line = conf['line']
 		
@@ -47,7 +114,8 @@ def generate(input, out_src, out_hdr) :
 				return rewrite(name, out)
 		
 		# where to scan for files, what to include, then what to remove from that
-		root = conf['root']
+		# .. need to offset from the config file
+		root = input[:input.rindex('/')] +'/' + conf['root']
 
 		# by default; include all none .orig files
 		take = '.*(?<!\\.orig)$'
@@ -77,6 +145,7 @@ def generate(input, out_src, out_hdr) :
 					for baby in sub(os.path.join(path, file)):
 						out.append(file + '/' + baby)
 			return out
+		
 		full = []
 		for seen in sub(root):
 			if want(seen):
@@ -92,7 +161,11 @@ def generate(input, out_src, out_hdr) :
 				with open(os.path.join(root, name), 'rb') as file:
 					src = file.read()
 					raw = rewrite(name, src)
+
+					# write the "header"
 					f.write('// {}: {}\n'.format(idx+1, name))
+
+					# write the contents ... which can be bigbig and crashy so don't
 					if echo:
 						f.write('\t\t#if 0\n')
 						f.write('\t\t\traw={}\n'.format(len(src)))
@@ -102,38 +175,42 @@ def generate(input, out_src, out_hdr) :
 						for txt in raw.decode('utf-8').split('\n'):
 							f.write('\t\t\t\t'+txt+'\n')
 						f.write('\t\t#endif\n')
+					
+					# increment the counter
+					idx += 1
+
+					# need one thing for "blank" and something else for full
 					if 0 == len(raw):
-						items.append('\t{{ "{}", true, nullptr, 0, nullptr, 0 }},\n'.format(name))
+						f.write('#define zip{} ((uint8_t*)nullptr)\n'.format(idx))
+						items.append('\tcompressed("{}", {}, 0, zip{}, raw{}, 0)\n'.format(name, idx, idx, idx))
 					else:
-						idx += 1
+						# compress the file
 						zip = zlib.compress(raw, level)
 						if strip:
 							# strip the two lead bytes so we don't need TINFL_FLAG_PARSE_ZLIB_HEADER
 							zip = zip[2:]
-
-						f.write('static uint8_t raw{}[{}];\n'.format(idx, len(raw)))
-						f.write('static const uint8_t zip{}[] = {{\n\t'.format(idx))
+						
+						# begin!
+						f.write('static const uint8_t zip{}[{}] = {{\n\t'.format(idx, len(zip)))
 
 						num = 0
 						dop = False
 						for byte in zip:
 							if dop:
 								f.write('\n\t')
-							if sys.version_info[0] >= 3:
-								f.write( hex(ord(chr(byte))).rjust(4, ' ') + ', ' )
-							else:
-								f.write(hex(ord(byte)) + ', ')
+							sttr = '0x' + (''.join('%02x' % byte).upper())
+							f.write(sttr + ', ' )
 							num += 1
 							dop = (0 == num % line)
 
+						# finish the compressed block
 						f.write('\n};\n')
 
-						items.append('\t{{ "{}", false, zip{}, sizeof(zip{}), raw{}, sizeof(raw{}) }},\n'.format(name, idx, idx, idx, idx))
+						# write the "item"
+						items.append('\tcompressed("{}", {}, {}, zip{}, raw{}, {})\n'.format(name, idx, len(zip), idx, idx, len(raw)))
 			
-			f.write('struct item_t { const char* _name; bool _hot; const uint8_t* _zip_data; const size_t _zip_size; uint8_t* _raw_data; size_t _raw_size; };\n')
-			f.write('item_t item_p[] = {\n');
+			f.write('compressed_begin()\n');
 			for item in items:
 				f.write(item)
 
-			f.write('\n\t{nullptr}\n');
-			f.write('};\n');
+			f.write('compressed_close()\n');
