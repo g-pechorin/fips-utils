@@ -157,6 +157,8 @@ def generate(input, out_src, out_hdr) :
 			
 			idx = -1
 			items = []
+			f.write('#ifndef compressed_blobs\n')
+			f.write('#define compressed_blobs ({})\n'.format(len(full)))
 			for name in full:
 				with open(os.path.join(root, name), 'rb') as file:
 					src = file.read()
@@ -208,9 +210,9 @@ def generate(input, out_src, out_hdr) :
 
 						# write the "item"
 						items.append('\tcompressed("{}", {}, {}, zip{}, raw{}, {})\n'.format(name, idx, len(zip), idx, idx, len(raw)))
-			
-			f.write('compressed_begin()\n');
+			f.write('#endif//compressed_blobs\n')
+			f.write('compressed_begin({})\n'.format(len(full)))
 			for item in items:
 				f.write(item)
 
-			f.write('compressed_close()\n');
+			f.write('compressed_close({})\n'.format(len(full)))
