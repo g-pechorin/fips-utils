@@ -4,7 +4,9 @@
       Convert binary files to a C array in a header.
 
       Usage:
-
+            https://github.com/floooh/sokol-samples/blob/master/sapp/CMakeLists.txt#L688
+            https://github.com/floooh/sokol-samples/blob/master/sapp/data/mods.yml
+            
       Create a YAML file with a list of files to convert and options:
 
       ---
