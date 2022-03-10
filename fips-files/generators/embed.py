@@ -60,7 +60,7 @@ def get_file_cname(filename, prefix) :
 #-------------------------------------------------------------------------------
 def gen_header(out_hdr, src_dir, files, prefix, list_items) :
     with open(out_hdr, 'w') as f:
-        f.write('#pragma once\n')
+        # don't do this ... sorry ... f.write('#pragma once\n')
         f.write('// #version:{}#\n'.format(Version))
         f.write('// machine generated, do not edit!\n')
         items = {}
