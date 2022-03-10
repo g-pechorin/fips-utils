@@ -89,14 +89,14 @@ def gen_header(out_hdr, src_dir, files, prefix, list_items) :
         if list_items:
             f.write('typedef struct {{ const char* name; const uint8_t* ptr; int size; }} {}item_t;\n'.format(prefix))
             f.write('#define {}NUM_ITEMS ({})\n'.format(prefix.upper(), len(items)))
-            f.write('{}item_t {}items[{}NUM_ITEMS] = {{\n'.format(prefix, prefix, prefix.upper()))
+            f.write('{}item_t {}items[{}NUM_ITEMS + 1] = {{\n'.format(prefix, prefix, prefix.upper()))
             for name,item in sorted(items.items()):
                 size = item[1]
                 text = name[(len(prefix)):]
                 if 'full' == list_items:
                     text = item[0]
                 f.write('{{ "{}", {}, {} }},\n'.format(text, name, size))
-            f.write('};\n')
+            f.write('{"",nullptr,0}};\n') #TODO; key this. not everyone wants my way
 
 #-------------------------------------------------------------------------------
 def generate(input, out_src, out_hdr) :
