@@ -100,7 +100,9 @@ def gen_header(out_hdr, src_dir, files, prefix, list_items) :
 
 #-------------------------------------------------------------------------------
 def generate(input, out_src, out_hdr) :
-    if genutil.isDirty(Version, [input], [out_hdr]) :
+    print('TODO; get regen to check timestamps on files')
+    # if genutil.isDirty(Version, [input], [out_hdr]) :
+    if True: # force regen always (sorry) until we can do the timestamps on files
         with open(input, 'r') as f :
             desc = yaml.load(f)
         prefix = 'embed_'
