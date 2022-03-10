@@ -73,7 +73,7 @@ def gen_header(out_hdr, src_dir, files, prefix, list_items) :
                     file_cname = get_file_cname(file, prefix)
                     file_size = os.path.getsize(file_path)
                     items[file_cname] = [file, file_size]
-                    f.write('unsigned char {}[{}] = {{\n'.format(file_cname, file_size))               
+                    f.write('unsigned char {}[{}] = {{\n'.format(file_cname, file_size+1))
                     num = 0
                     for byte in file_data :
                         if sys.version_info[0] >= 3:
@@ -83,7 +83,7 @@ def gen_header(out_hdr, src_dir, files, prefix, list_items) :
                         num += 1
                         if 0 == num%16:
                             f.write('\n')
-                    f.write('\n};\n')
+                    f.write('\n0x00};\n')
             else :
                 genutil.fmtError("Input file not found: '{}'".format(file_path))
         if list_items:
