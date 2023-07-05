@@ -1,7 +1,7 @@
 # fips-utils
 
-Grab-bag of useful fips utilities which are generally useful but don't
-quite fit into the core fips project.
+Grab-bag of useful fips utilities which are generally useful but don't quite fit into the core fips project.
+
 
 ## Usage
 
@@ -12,7 +12,7 @@ of your project:
 ---
 imports:
     fips-utils:
-        git: https://github.com/fips-libs/fips-utils
+        git: https://github.com/g-pechorin/fips-utils.git
 ```
 
 Now run ```fips fetch```.
