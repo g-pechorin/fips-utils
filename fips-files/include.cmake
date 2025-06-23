@@ -6,12 +6,18 @@
 #   Also see fips-files/generators/copy.py
 #
 macro(fipsutil_copy yml_file)
+    if (FIPS_ANDROID)
+        set(DEPLOY_DIR ${CMAKE_CURRENT_BINARY_DIR}/android/${CurTargetName}/assets)
+    else()
+        set(DEPLOY_DIR ${FIPS_PROJECT_DEPLOY_DIR})
+    endif()
+
     fips_generate(FROM ${yml_file}
         TYPE copy
         SRC_EXT ".c"
         HDR_EXT ".h"
         OUT_OF_SOURCE
-        ARGS "{ target_name: \"${CurTargetName}\", deploy_dir: \"${FIPS_PROJECT_DEPLOY_DIR}\" }")
+        ARGS "{ target_name: \"${CurTargetName}\", deploy_dir: \"${DEPLOY_DIR}\" }")
 endmacro()
 
 #-------------------------------------------------------------------------------

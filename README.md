@@ -26,7 +26,7 @@ For help on generators (aka custom build jobs) read on:
 
 Those are usually available through cmake macros:
 
-- [fipsutil_copy()](fips-files/generators/copy.py): copy files from project directory to deployment directory
+- [fipsutil_copy()](fips-files/generators/copy.py): copy files from project directory to deployment directory. On android files are copied to assets dir of android project (and packed to apk).
 - [fipsutil_embed()](fips-files/generators/embed.py): embed binary files into C headers
 
 For usage examples, see the [sokol-samples](https://github.com/floooh/sokol-samples/)
