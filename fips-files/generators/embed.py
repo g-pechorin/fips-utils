@@ -3,9 +3,11 @@
 
     Convert binary files to a C array in a header.
 
-    Usage:
-
-    Create a YAML file with a list of files to convert and options:
+      Usage:
+            https://github.com/floooh/sokol-samples/blob/master/sapp/CMakeLists.txt#L688
+            https://github.com/floooh/sokol-samples/blob/master/sapp/data/mods.yml
+            
+      Create a YAML file with a list of files to convert and options:
 
         ---
         options:
@@ -64,7 +66,7 @@ def get_file_cname(filename, prefix) :
 #-------------------------------------------------------------------------------
 def gen_header(out_hdr, src_dir, files, prefix, list_items) :
     with open(out_hdr, 'w') as f:
-        f.write('#pragma once\n')
+        # don't do this ... sorry ... f.write('#pragma once\n')
         f.write('// #version:{}#\n'.format(Version))
         f.write('// machine generated, do not edit!\n')
         items = {}
@@ -77,7 +79,7 @@ def gen_header(out_hdr, src_dir, files, prefix, list_items) :
                     file_cname = get_file_cname(file, prefix)
                     file_size = os.path.getsize(file_path)
                     items[file_cname] = [file, file_size]
-                    f.write('unsigned char {}[{}] = {{\n'.format(file_cname, file_size))               
+                    f.write('unsigned char {}[{}] = {{\n'.format(file_cname, file_size+1))
                     num = 0
                     for byte in file_data :
                         if sys.version_info[0] >= 3:
@@ -87,24 +89,26 @@ def gen_header(out_hdr, src_dir, files, prefix, list_items) :
                         num += 1
                         if 0 == num%16:
                             f.write('\n')
-                    f.write('\n};\n')
+                    f.write('\n0x00};\n')
             else :
                 genutil.fmtError("Input file not found: '{}'".format(file_path))
         if list_items:
             f.write('typedef struct {{ const char* name; const uint8_t* ptr; int size; }} {}item_t;\n'.format(prefix))
             f.write('#define {}NUM_ITEMS ({})\n'.format(prefix.upper(), len(items)))
-            f.write('{}item_t {}items[{}NUM_ITEMS] = {{\n'.format(prefix, prefix, prefix.upper()))
+            f.write('{}item_t {}items[{}NUM_ITEMS + 1] = {{\n'.format(prefix, prefix, prefix.upper()))
             for name,item in sorted(items.items()):
                 size = item[1]
                 text = name[(len(prefix)):]
                 if 'full' == list_items:
                     text = item[0]
                 f.write('{{ "{}", {}, {} }},\n'.format(text, name, size))
-            f.write('};\n')
+            f.write('{"",nullptr,0}};\n') #TODO; key this. not everyone wants my way
 
 #-------------------------------------------------------------------------------
 def generate(input, out_src, out_hdr) :
-    if genutil.isDirty(Version, [input], [out_hdr]) :
+    print('TODO; get regen to check timestamps on files')
+    # if genutil.isDirty(Version, [input], [out_hdr]) :
+    if True: # force regen always (sorry) until we can do the timestamps on files
         with open(input, 'r') as f :
             desc = yaml.load(f)
         prefix = 'embed_'

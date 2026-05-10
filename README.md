@@ -1,7 +1,7 @@
 # fips-utils
 
-Grab-bag of useful fips utilities which are generally useful but don't
-quite fit into the core fips project.
+Grab-bag of useful fips utilities which are generally useful but don't quite fit into the core fips project.
+
 
 ## Usage
 
@@ -12,7 +12,7 @@ of your project:
 ---
 imports:
     fips-utils:
-        git: https://github.com/fips-libs/fips-utils
+        git: https://github.com/g-pechorin/fips-utils.git
 ```
 
 Now run ```fips fetch```.
@@ -28,6 +28,7 @@ Those are usually available through cmake macros:
 
 - [fipsutil_copy()](fips-files/generators/copy.py): copy files from project directory to deployment directory. On android files are copied to assets dir of android project (and packed to apk).
 - [fipsutil_embed()](fips-files/generators/embed.py): embed binary files into C headers
+- [fipsutil_compress()](fips-files/generators/compress.py): compress your files into gzipped blobs you can then embed
 
 For usage examples, see the [sokol-samples](https://github.com/floooh/sokol-samples/)
 and [chips-test](https://github.com/floooh/chips-test/) repositories.
